@@ -1,58 +1,232 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+  <v-app id="inspire">
+    <v-content>
+      <v-container
+        class="fill-height"
+        fluid
+      >
+        <v-row
+          align="center"
+          justify="center"
+        >
+          <v-col
+            cols="12"
+            sm="8"
+            md="4"
+          >
+            <v-card class="elevation-12" height="480px">
+              <v-toolbar
+                color="primary"
+                dark
+                flat
+              >
+                <v-toolbar-title>Information form</v-toolbar-title>
+              </v-toolbar>
+              <v-fade-transition leave-absolute>
+                <template v-if="is_loading">
+                  <v-card-text style="width:100%">
+                    <v-form>
+                      <v-progress-circular
+                        :size="250"
+                        :width="20"
+                        color="blue-grey"
+                        style="margin:30px auto 0 auto;display:block;"
+                        indeterminate
+                      ></v-progress-circular>
+                    </v-form>
+                  </v-card-text>
+                </template>
+              </v-fade-transition>
+              <v-fade-transition leave-absolute>
+                <template v-if="is_success">
+                  <v-card-text style="width:100%">
+                    <v-form>
+                      <v-progress-circular
+                        :size="250"
+                        :width="20"
+                        :value="100"
+                        color="green"
+                        style="margin:30px auto 0 auto;display:block;"
+                      ></v-progress-circular>
+                    </v-form>
+                  </v-card-text>
+                </template>
+              </v-fade-transition>
+              <v-fade-transition leave-absolute>
+                <template v-if="is_fail">
+                </template>
+              </v-fade-transition>
+              <v-fade-transition>
+                <template v-if="is_start">
+                  <v-card-text>
+                    <v-form>
+                      <v-text-field
+                        v-model="birthday"
+                        label="Brithday"
+                        persistent-hint
+                        prepend-icon="event"
+                        type="date"
+                      ></v-text-field>
+                      <v-text-field
+                        v-model="name"
+                        label="Name"
+                        name="name"
+                        prepend-icon="account_box"
+                        type="text"
+                      ></v-text-field>
+                      <v-text-field
+                        v-model="issue_date"
+                        label="HKID Issue Date"
+                        persistent-hint
+                        prepend-icon="event"
+                        type="date"
+                      ></v-text-field>
+                      <v-row style="margin:0">
+                        <v-icon>account_balance</v-icon>
+                        <span style="padding-left:8px">First 4-digit of HKID</span>
+                      </v-row>
+                      <v-row
+                        style="margin:0;padding:0 20% 0 20%;"
+                        align="center"
+                        justify="center"
+                      >
+                        <v-text-field
+                          v-for="i of Array(4).keys()"
+                          v-bind:v-model="`itemCode_${i}`"
+                          v-bind:key="i"
+                          ref="pin_digit"
+                          type="password"
+                          :maxlength="1"
+                          style="width:25%;"
+                          single-line
+                          outlined
+                          class="centered-input"
+                          v-on:keyup="next_tab($event, i)"
+                        ></v-text-field>
+                      </v-row>
+                    </v-form>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn @click="submit_fake_form(true)" color="primary">Submit</v-btn>
+                    </v-card-actions>
+                  </v-card-text>
+                  
+                </template>
+              </v-fade-transition>
+
+              <v-fade-transition>
+                <template v-if="is_finish">
+                  <Qrcode :goBack="goBack"></Qrcode>
+                </template>
+              </v-fade-transition>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-content>
+  </v-app>
 </template>
 
 <script>
+import parse from 'date-fns/parse';
+import axios from 'axios';
+import Qrcode from './Qrcode';
 export default {
-  name: 'HelloWorld',
   props: {
-    msg: String
+    source: String,
+  },
+  data: () => ({
+    birthday: null,
+    name: null,
+    itemCode_0: null,
+    itemCode_1: null,
+    itemCode_2: null,
+    itemCode_3: null,
+    selectedItem: null,
+    issue_date: null,
+    is_start:true,
+    is_loading:false,
+    is_success:false,
+    is_fail:false,
+    is_finish:false,
+  }),
+  methods: {
+    next_tab (event, key) {
+      if (key < 3) {
+        this.$nextTick(() => {
+          this.$refs.pin_digit[key + 1].$refs.input.focus();
+        })
+      }
+    },
+    submit_form() {
+      this.is_start = false
+      this.is_loading = true
+      axios.post('/submit_data', {
+        birthday: this.birthday,
+        name: this.name,
+        itemCode: [
+          this.itemCode_0,
+          this.itemCode_1,
+          this.itemCode_2,
+          this.itemCode_3,
+        ].join(),
+        issue_date: this.issue_date
+      }).then(response => {
+          this.is_loading = false
+          this.is_success = true
+          setTimeout(() => {
+            this.is_success=false
+            this.is_finish=true
+          }, 2000)
+      }).catch(error => {
+          this.loading = false
+          this.is_fail = true
+      })
+    },
+    submit_fake_form(fake_success) {
+      this.is_start = false
+      this.is_loading = true
+      console.log({
+        birthday: this.birthday,
+        name: this.name,
+        itemCode: [
+          this.itemCode_0,
+          this.itemCode_1,
+          this.itemCode_2,
+          this.itemCode_3,
+        ].join(),
+        issue_date: this.issue_date
+      })
+      if (fake_success) {
+        setTimeout(() => {
+          this.is_loading = false
+          this.is_success = true
+          setTimeout(() => {
+            this.is_success = false
+            this.is_finish = true
+          }, 2000)
+        }, 2000)
+      } else {
+        setTimeout(() => {
+          this.loading = false
+          this.is_fail = true
+        }, 2000)
+      }
+    },
+    goBack(){
+      this.is_start = true,
+      this.is_loading = false,
+      this.is_success = false,
+      this.is_fail = false,
+      this.is_finish = false
+    },
+    parse: parse
+  },
+  components: {
+    Qrcode,
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+<style lang="scss">
+  @import '../styles/custom.scss';
 </style>
