@@ -20,5 +20,10 @@ yarn build
 yarn lint
 ```
 
+### depoly built file to AWS S3
+```
+yarn deploy
+```
+
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
