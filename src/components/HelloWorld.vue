@@ -54,15 +54,32 @@
               </v-fade-transition>
               <v-fade-transition leave-absolute>
                 <template v-if="is_fail">
+                  <v-card-text style="width:100%">
+                    <v-icon 
+                      large
+                      color="red darken-1"
+                      style="margin:30px 50px;display:block;font-size:250px;"
+                    >
+                      report_problem
+                    </v-icon>
+                    <v-row>
+                      <span style="padding-left:8px">Registration Fail.</span>
+                    </v-row>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn @click="goBack" color="primary">Back</v-btn>
+                    </v-card-actions>
+                  </v-card-text>
                 </template>
               </v-fade-transition>
-              <v-fade-transition>
+              <v-fade-transition leave-absolute>
                 <template v-if="is_start">
                   <v-card-text>
                     <v-form>
                       <v-text-field
                         v-model="birthday"
                         label="Brithday"
+                        key="birthDay"
                         persistent-hint
                         prepend-icon="event"
                         type="date"
@@ -76,6 +93,7 @@
                       ></v-text-field>
                       <v-text-field
                         v-model="issue_date"
+                        key="issueDay"
                         label="HKID Issue Date"
                         persistent-hint
                         prepend-icon="event"
@@ -92,7 +110,7 @@
                       >
                         <v-text-field
                           v-for="i of Array(4).keys()"
-                          v-bind:v-model="`itemCode_${i}`"
+                          v-model="itemCode[i]"
                           v-bind:key="i"
                           ref="pin_digit"
                           type="password"
@@ -101,13 +119,14 @@
                           single-line
                           outlined
                           class="centered-input"
+                          v-on:keydown="check_key"
                           v-on:keyup="next_tab($event, i)"
                         ></v-text-field>
                       </v-row>
                     </v-form>
                     <v-card-actions>
                       <v-spacer></v-spacer>
-                      <v-btn @click="submit_fake_form(true)" color="primary">Submit</v-btn>
+                      <v-btn @click="is_fake ? submit_fake_form(true) : submit_form" color="primary">Submit</v-btn>
                     </v-card-actions>
                   </v-card-text>
                   
@@ -116,7 +135,13 @@
 
               <v-fade-transition>
                 <template v-if="is_finish">
-                  <Qrcode :goBack="goBack"></Qrcode>
+                  <Qrcode :goBack="goBack" :registration_endpoint="registration_endpoint" :is_fake="is_fake"
+                    :birthday="birthday"
+                    :name="name"
+                    :itemCode="itemCode"
+                    :selectedItem="selectedItem"
+                    :issue_date="issue_date"
+                  ></Qrcode>
                 </template>
               </v-fade-transition>
             </v-card>
@@ -133,15 +158,14 @@ import axios from 'axios';
 import Qrcode from './Qrcode';
 export default {
   props: {
-    source: String,
+    check_endpoint: String,
+    registration_endpoint: String,
+    is_fake: Boolean
   },
   data: () => ({
     birthday: null,
     name: null,
-    itemCode_0: null,
-    itemCode_1: null,
-    itemCode_2: null,
-    itemCode_3: null,
+    itemCode: Array(4),
     selectedItem: null,
     issue_date: null,
     is_start:true,
@@ -151,8 +175,14 @@ export default {
     is_finish:false,
   }),
   methods: {
+    check_key(event) {
+      if (!/^\d*$/.test(event.key)) {
+        event.preventDefault();
+        return;
+      }
+    },
     next_tab (event, key) {
-      if (key < 3) {
+      if (key < this.itemCode.length - 1 && /^\d*$/.test(event.key)) {
         this.$nextTick(() => {
           this.$refs.pin_digit[key + 1].$refs.input.focus();
         })
@@ -161,15 +191,10 @@ export default {
     submit_form() {
       this.is_start = false
       this.is_loading = true
-      axios.post('/submit_data', {
-        birthday: this.birthday,
+      axios.post(this.check_endpoint, {
+        dob: this.birthday,
         name: this.name,
-        itemCode: [
-          this.itemCode_0,
-          this.itemCode_1,
-          this.itemCode_2,
-          this.itemCode_3,
-        ].join(),
+        hkid: this.itemCode.join(''),
         issue_date: this.issue_date
       }).then(response => {
           this.is_loading = false
@@ -186,17 +211,6 @@ export default {
     submit_fake_form(fake_success) {
       this.is_start = false
       this.is_loading = true
-      console.log({
-        birthday: this.birthday,
-        name: this.name,
-        itemCode: [
-          this.itemCode_0,
-          this.itemCode_1,
-          this.itemCode_2,
-          this.itemCode_3,
-        ].join(),
-        issue_date: this.issue_date
-      })
       if (fake_success) {
         setTimeout(() => {
           this.is_loading = false
@@ -208,12 +222,17 @@ export default {
         }, 2000)
       } else {
         setTimeout(() => {
-          this.loading = false
+          this.is_loading = false
           this.is_fail = true
         }, 2000)
       }
     },
     goBack(){
+      this.birthday = null,
+      this.name = null,
+      this.itemCode = Array(4),
+      this.selectedItem = null,
+      this.issue_date = null,
       this.is_start = true,
       this.is_loading = false,
       this.is_success = false,
