@@ -3,7 +3,7 @@
     <v-fade-transition leave-absolute>
       <template v-if="!is_submitted">
         <v-form>
-          <qrcode-stream @decode="is_fake ? onDecodeFake : onDecode"></qrcode-stream>
+          <qrcode-stream @decode="onDecode"></qrcode-stream>
         </v-form>
       </template>
     </v-fade-transition>
@@ -49,22 +49,26 @@ export default {
   },
   methods: {
     onDecode (decodedString) {
-      axios.post(this.registration_endpoint, {
-        wallet_address: decodedString,
-        dob: this.birthday,
-        name: this.name,
-        hkid: this.itemCode.join(''),
-        issue_date: this.issue_date
-      }).then(response => {
-          this.is_loading = false
-          this.is_success = true
-      })
+      if (this.is_fake){
+        console.log(decodedString)
+        setTimeout(() => {
+          this.is_submitted = true
+        }, 2000)
+      } else {
+        axios.post(this.registration_endpoint, {
+          wallet_address: decodedString,
+          dob: this.birthday,
+          name: this.name,
+          hkid: this.itemCode.join(''),
+          issue_date: this.issue_date
+        }).then(response => {
+            this.is_loading = false
+            this.is_success = true
+        })
+      }
     },
     onDecodeFake (decodedString) {
-      console.log(decodedString)
-      setTimeout(() => {
-        this.is_submitted = true
-      }, 2000)
+      
     }
   }
 }

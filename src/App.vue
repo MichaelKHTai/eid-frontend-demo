@@ -42,7 +42,10 @@
     </v-app-bar>
 
     <v-content style="padding:0">
-      <HelloWorld :check_endpoint="check_endpoint" :registration_endpoint="registration_endpoint" :is_fake="is_fake"/>
+      <HelloWorld
+        v-bind:check_endpoint="check_endpoint"
+        v-bind:registration_endpoint="registration_endpoint"
+        v-bind:is_fake="is_fake"/>
     </v-content>
   </v-app>
 </template>

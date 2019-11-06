@@ -126,7 +126,7 @@
                     </v-form>
                     <v-card-actions>
                       <v-spacer></v-spacer>
-                      <v-btn @click="is_fake ? submit_fake_form(true) : submit_form" color="primary">Submit</v-btn>
+                      <v-btn @click="is_fake ? submit_fake_form(true) : submit_form()" color="primary">Submit</v-btn>
                     </v-card-actions>
                   </v-card-text>
                   
@@ -135,12 +135,12 @@
 
               <v-fade-transition>
                 <template v-if="is_finish">
-                  <Qrcode :goBack="goBack" :registration_endpoint="registration_endpoint" :is_fake="is_fake"
-                    :birthday="birthday"
-                    :name="name"
-                    :itemCode="itemCode"
-                    :selectedItem="selectedItem"
-                    :issue_date="issue_date"
+                  <Qrcode :goBack="goBack" v-bind:registration_endpoint="registration_endpoint" v-bind:is_fake="is_fake"
+                    v-bind:birthday="birthday"
+                    v-bind:name="name"
+                    v-bind:itemCode="itemCode"
+                    v-bind:selectedItem="selectedItem"
+                    v-bind:issue_date="issue_date"
                   ></Qrcode>
                 </template>
               </v-fade-transition>
@@ -204,7 +204,7 @@ export default {
             this.is_finish=true
           }, 2000)
       }).catch(error => {
-          this.loading = false
+          this.is_loading = false
           this.is_fail = true
       })
     },
