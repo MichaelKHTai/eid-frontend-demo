@@ -18,5 +18,8 @@ module.exports = {
       preProcessor: "scss",
       patterns: [path.resolve(__dirname, "./src/styles/custom.scss")]
     }
+  },
+  configureWebpack: {
+    devtool: 'source-map'
   }
 }
