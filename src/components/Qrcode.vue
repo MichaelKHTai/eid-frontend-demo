@@ -3,7 +3,9 @@
     <v-fade-transition leave-absolute>
       <template v-if="!is_submitted">
         <v-form>
-          <qrcode-stream @decode="onDecode"></qrcode-stream>
+          <qrcode-stream 
+            @decode="onDecode"
+          ></qrcode-stream>
         </v-form>
       </template>
     </v-fade-transition>
@@ -12,12 +14,22 @@
         <v-card-text>
           <v-form>
             <v-row>
-              <span style="padding-left:8px">Registration Completed.</span>
+              <span style="padding-left:8px">E-ID is successfully registered, are you goining to register E-Vote as well?</span>
             </v-row>
+            <v-select
+              v-model="living_place"
+              :items="living_options"
+              menu-props="auto"
+              label="Living District"
+              hide-details
+              prepend-icon="map"
+              single-line
+            ></v-select>
           </v-form>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="goBack" color="primary">Back</v-btn>
+            <v-btn @click="goBack" color="primary">Yes</v-btn>
+            <v-btn @click="goBack" color="secondnary">Skip & Finish</v-btn>
           </v-card-actions>
         </v-card-text>
       </template>
@@ -40,7 +52,29 @@ export default {
     is_fake: Boolean
   },
   data: () => ({
-    is_submitted: false
+    is_submitted: false,
+    living_place: null,
+    living_options: [
+      "Central and Western",
+      "Eastern",
+      "Southern",
+      "Wan Chai",
+      "Sham Shui Po",
+      "Kowloon City",
+      "Kwun Tong",
+      "Wong Tai Sin",
+      "Yau Tsim Mong",
+      "Islands",
+      "Kwai Tsing",
+      "North",
+      "Sai Kung",
+      "Sha Tin",
+      "Tai Po",
+      "Tsuen Wan",
+      "Tuen Mun",
+      "Yuen Long",
+      "Oversea"
+    ] 
   }),
   components: {
     QrcodeStream,

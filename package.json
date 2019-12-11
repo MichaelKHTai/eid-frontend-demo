@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "deploy": "aws s3 sync ./dist s3://static-eid-poc"
+    "deploy": "aws s3 sync ./dist s3://hkciviltech.cc"
   },
   "dependencies": {
     "@mdi/js": "^4.5.95",

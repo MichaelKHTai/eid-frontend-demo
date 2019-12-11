@@ -101,7 +101,7 @@
                       ></v-text-field>
                       <v-row style="margin:0">
                         <v-icon>account_balance</v-icon>
-                        <span style="padding-left:8px">First 4-digit of HKID</span>
+                        <span style="padding-left:8px">First 5-digit of HKID</span>
                       </v-row>
                       <v-row
                         style="margin:0;padding:0 20% 0 20%;"
@@ -109,13 +109,13 @@
                         justify="center"
                       >
                         <v-text-field
-                          v-for="i of Array(4).keys()"
+                          v-for="i of Array(5).keys()"
                           v-model="itemCode[i]"
                           v-bind:key="i"
                           ref="pin_digit"
                           type="password"
                           :maxlength="1"
-                          style="width:25%;"
+                          style="width:20%;"
                           single-line
                           outlined
                           class="centered-input"
@@ -165,7 +165,7 @@ export default {
   data: () => ({
     birthday: null,
     name: null,
-    itemCode: Array(4),
+    itemCode: Array(5),
     selectedItem: null,
     issue_date: null,
     is_start:true,
